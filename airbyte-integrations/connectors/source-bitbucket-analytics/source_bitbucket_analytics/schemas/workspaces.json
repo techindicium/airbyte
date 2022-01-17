@@ -1,0 +1,129 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "links": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "avatar": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "html": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "members": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "owners": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "projects": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "repositories": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "snippets": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "self": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "uuid": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "is_private": {
+      "type": "boolean"
+    },
+    "created_on": {
+      "type": "string"
+    },
+    "updated_on": {
+      "type": "string"
+    }
+  }
+}

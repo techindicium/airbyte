@@ -1,0 +1,204 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "links": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "self": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "html": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "avatar": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "pullrequests": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "commits": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "forks": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "watchers": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "downloads": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "clone": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [],
+            "properties": {
+              "href": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "hooks": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "uuid": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "is_private": {
+      "type": "boolean"
+    },
+    "scm": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "created_on": {
+      "type": "string"
+    },
+    "updated_on": {
+      "type": "string"
+    },
+    "size": {
+      "type": "number"
+    },
+    "language": {
+      "type": "string"
+    },
+    "has_issues": {
+      "type": "boolean"
+    },
+    "has_wiki": {
+      "type": "boolean"
+    },
+    "fork_policy": {
+      "type": "string"
+    },
+    "project": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "mainbranch": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

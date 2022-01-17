@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "diff": {
+      "type": "string"
+    }
+  }
+}

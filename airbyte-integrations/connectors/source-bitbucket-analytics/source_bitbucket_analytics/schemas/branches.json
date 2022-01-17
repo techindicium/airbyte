@@ -1,0 +1,72 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "links": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "self": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "commits": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "html": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "name": {
+      "type": "string"
+    },
+    "target": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "merge_strategies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "default_merge_strategy": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "links": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "self": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "code": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "html": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "deleted": {
+      "type": "string"
+    },
+    "pullrequest": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "number"
+        },
+        "links": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "self": {
+              "type": "object",
+              "required": [],
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            },
+            "html": {
+              "type": "object",
+              "required": [],
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "raw": {
+          "type": "string"
+        },
+        "markup": {
+          "type": "string"
+        },
+        "html": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "created_on": {
+      "type": "string"
+    },
+    "user": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "display_name": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "links": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "self": {
+              "type": "object",
+              "required": [],
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            },
+            "html": {
+              "type": "object",
+              "required": [],
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            },
+            "avatar": {
+              "type": "object",
+              "required": [],
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "type": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "account_id": {
+          "type": "string"
+        }
+      }
+    },
+    "inline": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "to": {
+          "type": "number"
+        },
+        "from": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "updated_on": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "id": {
+      "type": "number"
+    }
+  }
+}

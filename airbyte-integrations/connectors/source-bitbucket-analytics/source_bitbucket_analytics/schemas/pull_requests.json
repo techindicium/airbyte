@@ -1,0 +1,289 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "links": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "self": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "html": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "commits": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "approve": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "diff": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "diffstat": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "comments": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "activity": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "merge": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "decline": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "id": {
+      "type": "number"
+    },
+    "title": {
+      "type": "string"
+    },
+    "rendered": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "title": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "raw": {
+              "type": "string"
+            },
+            "markup": {
+              "type": "string"
+            },
+            "html": {
+              "type": "string"
+            }
+          }
+        },
+        "description": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "raw": {
+              "type": "string"
+            },
+            "markup": {
+              "type": "string"
+            },
+            "html": {
+              "type": "string"
+            }
+          }
+        },
+        "reason": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "raw": {
+              "type": "string"
+            },
+            "markup": {
+              "type": "string"
+            },
+            "html": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "raw": {
+          "type": "string"
+        },
+        "markup": {
+          "type": "string"
+        },
+        "html": {
+          "type": "string"
+        }
+      }
+    },
+    "state": {
+      "type": "string"
+    },
+    "author": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": [],
+      "properties": {}
+    },
+    "destination": {
+      "type": "object",
+      "required": [],
+      "properties": {}
+    },
+    "merge_commit": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "hash": {
+          "type": "string"
+        }
+      }
+    },
+    "comment_count": {
+      "type": "number"
+    },
+    "task_count": {
+      "type": "number"
+    },
+    "close_source_branch": {
+      "type": "boolean"
+    },
+    "closed_by": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "reason": {
+      "type": "string"
+    },
+    "created_on": {
+      "type": "string"
+    },
+    "updated_on": {
+      "type": "string"
+    },
+    "reviewers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
