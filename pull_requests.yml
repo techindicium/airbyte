@@ -1,0 +1,119 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer rCH6hhQ5kcZOTMag0ivQbUkeW7wrEub_uRUSuLuu-asl_9cH69eEnrCzv_2OtwKioPPmHTB4OVoUyvOu9A==
+      Connection:
+      - keep-alive
+      User-Agent:
+      - PostmanRuntime/7.28.0
+    method: GET
+    uri: https://api.bitbucket.org/2.0/repositories/indiciumtech/hu-airflow/pullrequests?per_page=50&state=all&sort=updated_on&direction=asc
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 21 Jan 2022 05:22:54 GMT
+      ETag:
+      - '"gz[8ff82cc56f100272ecd4e5442126e96a]"'
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Authorization, Origin, cookie, user-context
+      - Accept-Encoding
+      X-Accepted-OAuth-Scopes:
+      - pullrequest
+      X-B3-TraceId:
+      - 2d914fc52e73e98b
+      X-Consumer-Client-Id:
+      - zhSWyw3t2AkQS7YgUC
+      X-Credential-Type:
+      - oauth2
+      X-Dc-Location:
+      - Micros
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-OAuth-Scopes:
+      - webhook, pullrequest:write
+      X-Render-Time:
+      - '0.126377105713'
+      X-Request-Count:
+      - '596'
+      X-Served-By:
+      - 2ebf8d2b16cc
+      X-Static-Version:
+      - e9a4dea0e1a0
+      X-Token-Id:
+      - '87300865'
+      X-Usage-Input-Ops:
+      - '0'
+      X-Usage-Output-Ops:
+      - '0'
+      X-Usage-System-Time:
+      - '0.000000'
+      X-Usage-User-Time:
+      - '0.085364'
+      X-Version:
+      - e9a4dea0e1a0
+      X-View-Name:
+      - bitbucket.apps.pullrequests.api.v20.handlers.RepositoryPullRequestsHandler
+    status:
+      code: 200
+      message: OK
+version: 1

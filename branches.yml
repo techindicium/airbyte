@@ -1,0 +1,101 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer rCH6hhQ5kcZOTMag0ivQbUkeW7wrEub_uRUSuLuu-asl_9cH69eEnrCzv_2OtwKioPPmHTB4OVoUyvOu9A==
+      Connection:
+      - keep-alive
+      User-Agent:
+      - PostmanRuntime/7.28.0
+    method: GET
+    uri: https://api.bitbucket.org/2.0/repositories/indiciumtech/hu-airflow/refs/branches?per_page=50
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+1Yy3LbNhT9FQ5ntIpJAhBJAJqkaTsZL7zOLu14Lh6UYFMkS4B2XY2+pp+SH+uA
+        lGSpsSdULLldeKcHeO/BPRfnHmIVNjDXpa7CWYDRRRDeQdlpG86CL6uwgqUOZ0Go9J0u6ya8CMLS
+        VLf+31Uo6+XSuOHzotWFX7hwrrGzJIHGxMI40clb7eK6nSckRkmrm9oaV7dG28RUykjTLZ2Wi2TR
+        RWDaoqzvk03YZJtzfRGEVpc+/Co8YZ5WFzYRLVRyoe1BtoVblk9mO9zRcxsYYj5G9BtQuoCudNdL
+        3c71tXUtOD1/8BUbfhk27et7sMIMRHyzyP7RgV345QVYd13U7T20Kvz9IgjdQ9NTNqDwSxy0c+2G
+        DfmnZkEokaKcFQgzxPOUylRBplmWc8EYxpSnoEWGkPKP70jzcFd7/J+BlNDX6mXl70PAHThon+bw
+        wem9tmyHpcmE/goc82kBWYQJJlGaimnEBaWR4nma51PCtJxO6KePzn7Y0BmuPd5txfcKdRHsjs5j
+        Z/d0dWV5vT1VzzSQX9d1RnmiVmNArfs9Px7MMxCzOZXJ6MbxhfFNratzKcRoLD32HocH1YCT/gyc
+        VEv6oKMBnaDLdyp5FCHKFCeXUR/zuJ1D07T1nRepk3IwSOhoKMkWhm8K68B1thfb/xTTDkcvLNC5
+        RT2oWAv3Xg5uaqjjG6hMZYL3e19+3kpJ7KfpT73qb+bAJojXFKuHYMrYpoSHnQ5d1V//roOrPuyB
+        +ExpJotMoYgznEapKCACSkhEqeCUIyQllWv/xA9rj8dkvfiOSTWhn445OuOjJt8bGlbLrtXxfDMt
+        Ylkvk83gwIIzMsVcsIynXCglU04gw4QzlBeCfVQfelM0mf4yIZcTcjk8Fy2hgrn2+hhFw0827mx0
+        r62LSNy0tYqbTpRGxuDKqAGwcaXdhFyayjgDpZ2Qy6urCMdNNT+cQz3PfgIZebsdNf+mGKSsu8pd
+        D1MmRwVnjFEtQQmMUM6LlOaaD3EbaDcq/mUVLjYOAiNOU1UQJEFOMdeKaywhYxnHOUkLjNKiwDIT
+        +634aHJ+uF92M/b7DjIZDdErwMtMx06Ox+dcr71bU+B6t0YQIRHCEUGfEZthPJuydwjNEPL1W2pr
+        Yd6vkwuo5loFsq2r4KYWQVG3gQJTPvxWPVFqLyOPLn4J1un28LwOnJzNxG9S9hp7dg+/l+yFdG4s
+        /Dagh/8/c/CMMWCKqBRwhrggFPKUE6EpaM4oSRlPFSIMe7Z3h+bNwb85+NGN45v+zA5+LJZXc/Bj
+        AR1jQ7bW7Ll7jqNyns3BH4Via53P4+DHQnlNBz8a0xgH/2bgx12wvRn4Mxr4XBCJIUNTqikjMmOo
+        EBSmiohCEIQUS7GmKe+vALc3XK9s4EdDPKGBH5/zGwOPI4wjxD9jNsvQjJAnDXxh/gzuoDUgSh34
+        tzP7jHH3bwf+Zt5fy/sbCvOX/0jW/wCu1rgusBcAAA==
+    headers:
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 21 Jan 2022 05:22:53 GMT
+      ETag:
+      - '"gz[14f27e30cc6f82ab563bb50b6530002a]"'
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Authorization, Origin, cookie, user-context
+      - Accept-Encoding
+      X-Accepted-OAuth-Scopes:
+      - repository
+      X-B3-TraceId:
+      - fe70054aa95d6889
+      X-Consumer-Client-Id:
+      - zhSWyw3t2AkQS7YgUC
+      X-Credential-Type:
+      - oauth2
+      X-Dc-Location:
+      - Micros
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-OAuth-Scopes:
+      - webhook, pullrequest:write
+      X-Render-Time:
+      - '0.095664024353'
+      X-Request-Count:
+      - '481'
+      X-Served-By:
+      - 6eaf8c309311
+      X-Static-Version:
+      - e9a4dea0e1a0
+      X-Token-Id:
+      - '87300865'
+      X-Usage-Input-Ops:
+      - '24'
+      X-Usage-Output-Ops:
+      - '0'
+      X-Usage-System-Time:
+      - '0.002074'
+      X-Usage-User-Time:
+      - '0.047366'
+      X-Version:
+      - e9a4dea0e1a0
+      X-View-Name:
+      - bitbucket.apps.repo2.api.v20.refs.BranchesHandler
+    status:
+      code: 200
+      message: OK
+version: 1

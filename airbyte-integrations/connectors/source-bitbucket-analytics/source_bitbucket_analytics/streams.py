@@ -12,6 +12,7 @@ import requests
 from airbyte_cdk.models import SyncMode
 from airbyte_cdk.sources.streams.http import HttpStream, HttpSubStream
 from requests.exceptions import HTTPError
+import json
 
 
 class BitbucketStream(HttpStream, ABC):
@@ -21,7 +22,7 @@ class BitbucketStream(HttpStream, ABC):
     use_cache = True
 
     # Bitbucket pagination could be from 1 to 100.
-    page_size = 100
+    page_size = 50
 
     stream_base_params = {}
 
@@ -42,7 +43,7 @@ class BitbucketStream(HttpStream, ABC):
             yield {"repository": repository}
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
-        content = response.content
+        content = json.loads(response.content)
         if "next" in content:
             next_link = content["next"]["url"]
             parsed_link = parse.urlparse(next_link)
@@ -168,7 +169,7 @@ class SemiIncrementalBitbucketStream(BitbucketStream):
     in the code and output only latest records (like incremental streams).
     """
 
-    cursor_field = "updated_at"
+    cursor_field = "updated_on"
 
     # This flag is used to indicate that current stream supports `sort` and `direction` request parameters and that
     # we should break processing records if possible. If `sort` is set to `updated` and `direction` is set to `desc`
@@ -304,9 +305,12 @@ class PullRequests(SemiIncrementalBitbucketStream):
     def transform(self, record: MutableMapping[str, Any], repository: str = None, **kwargs) -> MutableMapping[str, Any]:
         record = super().transform(record=record, repository=repository)
 
-        for nested in ("head", "base"):
-            entry = record.get(nested, {})
-            entry["repo_id"] = (record.get("head", {}).pop("repo", {}) or {}).get("id")
+        # for nested in ("head", "base"):
+        #     entry = record.get(nested, {})
+        #     entry["repo_id"] = (record.get("head", {}).pop("repo", {}) or {}).get("id")
+        entry = record
+        entry["repo_id"] = entry.get("source").get("repository").get("uuid")
+
 
         return record
 
@@ -314,7 +318,7 @@ class PullRequests(SemiIncrementalBitbucketStream):
         base_params = super().request_params(**kwargs)
         # The very first time we read this stream we want to read ascending so we can save state in case of
         # a halfway failure. But if there is state, we read descending to allow incremental behavior.
-        params = {"state": "all", "sort": "updated", "direction": "desc" if self.is_sorted_descending else "asc"}
+        params = {"state": "all", "sort": "updated_on", "direction": "desc" if self.is_sorted_descending else "asc"}
 
         return {**base_params, **params}
 
@@ -343,7 +347,7 @@ class PullRequestSubstream(HttpSubStream, SemiIncrementalBitbucketStream, ABC):
         parent_stream_slices = super().stream_slices(sync_mode=sync_mode, cursor_field=cursor_field, stream_state=parent_state)
         for parent_stream_slice in parent_stream_slices:
             yield {
-                "pull_request_number": parent_stream_slice["parent"]["number"],
+                "pull_request_id": parent_stream_slice["parent"]["id"],
                 "repository": parent_stream_slice["parent"]["repository"],
             }
 
@@ -432,14 +436,14 @@ class PullRequestActivity(PullRequestSubstream):
 
 
 
-class RepositoryStats(GithubStream):
+class RepositoryStats(BitbucketStream):
     """
     This stream is technical and not intended for the user, we use it for checking connection with the repository.
     API docs: https://docs.github.com/en/rest/reference/repos#get-a-repository
     """
 
     def path(self, stream_slice: Mapping[str, Any] = None, **kwargs) -> str:
-        return f"repos/{stream_slice['repository']}"
+        return f"repositories/{stream_slice['repository']}"
 
     def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any] = None, **kwargs) -> Iterable[Mapping]:
         yield response.json()

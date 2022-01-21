@@ -41,7 +41,7 @@ TOKEN_SEPARATOR = ","
 # specified by using asteriks i.e. "airbytehq/*"
 workspace_PATTERN = re.compile("^.*/\\*$")
 
-class SourceBitbucket(AbstractSource):
+class SourceBitbucketAnalytics(AbstractSource):
     @staticmethod
     def _generate_repositories(config: Mapping[str, Any], authenticator: MultipleTokenAuthenticator) -> Tuple[List[str], List[str]]:
         """
@@ -57,7 +57,7 @@ class SourceBitbucket(AbstractSource):
         repositories = list(filter(None, config["repository"].split(" ")))
 
         if not repositories:
-            raise Exception("Field `repository` required to be provided for connect to Github API")
+            raise Exception("Field `repository` required to be provided for connect to Bitbucket API")
 
         repositories_list: set = {repo for repo in repositories if not workspace_PATTERN.match(repo)}
         workspaces = [org.split("/")[0] for org in repositories if org not in repositories_list]
@@ -80,7 +80,7 @@ class SourceBitbucket(AbstractSource):
             creds = config.get("credentials")
             token = creds.get("access_token") or creds.get("personal_access_token")
         tokens = [t.strip() for t in token.split(TOKEN_SEPARATOR)]
-        return MultipleTokenAuthenticator(tokens=tokens, auth_method="token")
+        return MultipleTokenAuthenticator(tokens=tokens, auth_method="Bearer")
 
     @staticmethod
     def _get_branches_data(selected_branches: str, full_refresh_args: Dict[str, Any] = None) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
@@ -92,7 +92,7 @@ class SourceBitbucket(AbstractSource):
         for stream_slice in repository_stats_stream.stream_slices(sync_mode=SyncMode.full_refresh):
             default_branches.update(
                 {
-                    repo_stats["full_name"]: repo_stats["default_branch"]
+                    repo_stats["full_name"]: repo_stats["mainbranch"]["name"]
                     for repo_stats in repository_stats_stream.read_records(sync_mode=SyncMode.full_refresh, stream_slice=stream_slice)
                 }
             )
