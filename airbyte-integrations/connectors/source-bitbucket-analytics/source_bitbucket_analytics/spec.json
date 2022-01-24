@@ -15,7 +15,7 @@
           {
             "type": "object",
             "title": "Authenticate via Bitbucket (OAuth)",
-            "required": ["access_token"],
+            "required": ["refresh_token, client_id, client_secret"],
             "properties": {
               "option_title": {
                 "type": "string",
@@ -23,7 +23,7 @@
                 "description": "OAuth Credentials",
                 "const": "OAuth Credentials"
               },
-              "access_token": {
+              "refresh_token": {
                 "type": "string",
                 "title": "Access Token",
                 "description": "OAuth access token",
