@@ -6,6 +6,9 @@
       "type": "object",
       "required": [],
       "properties": {
+        "repository": {
+          "type": ["string"]
+        },
         "self": {
           "type": "object",
           "required": [],

@@ -43,9 +43,13 @@ class BitbucketStream(HttpStream, ABC):
             yield {"repository": repository}
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
-        content = json.loads(response.content)
+        try:
+            content = json.loads(response.content)
+        except ValueError as e:
+            content = {"value": response.text}
+
         if "next" in content:
-            next_link = content["next"]["url"]
+            next_link = content["next"]
             parsed_link = parse.urlparse(next_link)
             page = dict(parse.parse_qsl(parsed_link.query)).get("page")
             return {"page": page}
@@ -71,6 +75,7 @@ class BitbucketStream(HttpStream, ABC):
 
         return max(backoff_time, 60)  # This is a guarantee that no negative value will be returned.
 
+    ####################### NEEDS TO BE REFACTORED #######################
     def read_records(self, stream_slice: Mapping[str, any] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
         try:
             yield from super().read_records(stream_slice=stream_slice, **kwargs)
@@ -276,7 +281,7 @@ class Repositories(Workspaces):
         return f"repositories/{stream_slice['workspace']}"
 
     def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any] = None, **kwargs) -> Iterable[Mapping]:
-        for record in response.json():  # Bitbucket puts records in an array.
+        for record in response.json()["values"]:  # Bitbucket puts records in an array.
             yield self.transform(record=record, workspace=stream_slice["workspace"])
 
 
@@ -303,14 +308,9 @@ class PullRequests(SemiIncrementalBitbucketStream):
         return f"repositories/{stream_slice['repository']}/pullrequests"
 
     def transform(self, record: MutableMapping[str, Any], repository: str = None, **kwargs) -> MutableMapping[str, Any]:
-        record = super().transform(record=record, repository=repository)
+        record = super().transform(record=record, repository=repository, **kwargs)
 
-        # for nested in ("head", "base"):
-        #     entry = record.get(nested, {})
-        #     entry["repo_id"] = (record.get("head", {}).pop("repo", {}) or {}).get("id")
-        entry = record
-        entry["repo_id"] = entry.get("source").get("repository").get("uuid")
-
+        record["repo_id"] = record.get("source").get("repository").get("uuid")
 
         return record
 
@@ -365,6 +365,14 @@ class PullRequestSubstream(HttpSubStream, SemiIncrementalBitbucketStream, ABC):
         yield from super(SemiIncrementalBitbucketStream, self).read_records(
             sync_mode=sync_mode, cursor_field=cursor_field, stream_slice=stream_slice, stream_state=stream_state
         )
+    
+    def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None, **kwargs) -> MutableMapping[str, Any]:
+        record = super().transform(record=record, repository=repository, **kwargs)
+        record['pull_request_id'] = pull_request_id
+
+        return record
+
+    
 
 # repositories > {workspace} > {repo_slug} > pullrequests > {pull_request_id} > diff
 class PullRequestDiff(PullRequestSubstream):
@@ -382,12 +390,9 @@ class PullRequestDiff(PullRequestSubstream):
         return f"repositories/{stream_slice['repository']}/pullrequests/{stream_slice['pull_request_id']}/diff"
 
     def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
-        yield self.transform(response.json(), repository=stream_slice["repository"])
-
-    def transform(self, record: MutableMapping[str, Any], repository: str = None) -> MutableMapping[str, Any]:
-        record = super().transform(record=record, repository=repository)
-        return {key: value for key, value in record.items() if key in self.record_keys}
-
+        # The endoint returns a string, so we need to parse it into a dict.
+        record = {"diff":response.text}
+        yield super().transform(record, repository=stream_slice["repository"], pull_request_id=stream_slice["pull_request_id"])
 
 # repositories > {workspace} > {repo_slug} > pullrequests > {pull_request_id} > Comments
 class PullRequestComments(PullRequestSubstream):
@@ -405,11 +410,9 @@ class PullRequestComments(PullRequestSubstream):
         return f"repositories/{stream_slice['repository']}/pullrequests/{stream_slice['pull_request_id']}/comments"
 
     def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
-        yield self.transform(response.json(), repository=stream_slice["repository"])
-
-    def transform(self, record: MutableMapping[str, Any], repository: str = None) -> MutableMapping[str, Any]:
-        record = super().transform(record=record, repository=repository)
-        return {key: value for key, value in record.items() if key in self.record_keys}
+        for record in response.json()["values"]:  # GitHub puts records in an array.
+            yield super().transform(record=record, repository=stream_slice["repository"], \
+                                    pull_request_id=stream_slice["pull_request_id"])
 
 
 # repositories > {workspace} > {repo_slug} > pullrequests > {pull_request_id} > Activities
@@ -428,12 +431,12 @@ class PullRequestActivity(PullRequestSubstream):
         return f"repositories/{stream_slice['repository']}/pullrequests/{stream_slice['pull_request_id']}/activity"
 
     def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
-        yield self.transform(response.json(), repository=stream_slice["repository"])
+        for record in response.json()["values"]:
+            yield self.transform(record=record, repository=stream_slice["repository"], pull_request_id=stream_slice["pull_request_id"])
 
-    def transform(self, record: MutableMapping[str, Any], repository: str = None) -> MutableMapping[str, Any]:
-        record = super().transform(record=record, repository=repository)
+    def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None) -> MutableMapping[str, Any]:
+        record = super().transform(record=record, repository=repository, pull_request_id=pull_request_id)
         return {key: value for key, value in record.items() if key in self.record_keys}
-
 
 
 class RepositoryStats(BitbucketStream):

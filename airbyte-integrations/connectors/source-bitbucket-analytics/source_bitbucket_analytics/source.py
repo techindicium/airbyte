@@ -3,13 +3,17 @@
 #
 
 import re
-from typing import Any, Dict, List, Mapping, Tuple
+from typing import Any, Dict, List, Mapping, Tuple, MutableMapping
 
 from airbyte_cdk import AirbyteLogger
 from airbyte_cdk.models import SyncMode
 from airbyte_cdk.sources import AbstractSource
 from airbyte_cdk.sources.streams import Stream
 from airbyte_cdk.sources.streams.http.auth import MultipleTokenAuthenticator
+from airbyte_cdk.sources.streams.http.auth import Oauth2Authenticator
+from requests.auth import AuthBase
+import json
+import requests
 
 from .streams import (
     Branches,
@@ -41,9 +45,60 @@ TOKEN_SEPARATOR = ","
 # specified by using asteriks i.e. "airbytehq/*"
 workspace_PATTERN = re.compile("^.*/\\*$")
 
+class BitbucketAuthenticator(AuthBase):
+    """
+    Temporary method to get access token
+    """
+
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        access_token_name: str = "access_token",
+    ):
+        self.client_secret = client_secret
+        self.client_id = client_id
+        self.access_token_name = access_token_name
+        self.access_token_endpoint = "https://bitbucket.org/site/oauth2/access_token"
+        self._access_token = None
+
+
+    def __call__(self, request):
+        request.headers.update(self.get_auth_header())
+        return request
+
+    def get_auth_header(self) -> Mapping[str, Any]:
+        return {"Authorization": f"Bearer {self.get_access_token()}"}
+
+    def get_access_token(self):
+        return self.access_token()
+
+    def get_request_body(self) -> Mapping[str, Any]:
+        """Override to define additional parameters"""
+        payload: MutableMapping[str, Any] = {
+            "grant_type": "client_credentials",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+        }
+
+        return payload
+
+    def access_token(self) -> Tuple[str, int]:
+        """
+        returns a tuple of (access_token, token_lifespan_in_seconds)
+        """
+        try:
+            response = requests.request(method="POST", url=self.access_token_endpoint, data=self.get_request_body())
+            response.raise_for_status()
+            access_token = json.loads(response.content)["access_token"]            
+            return access_token
+        except Exception as e:
+            raise Exception(f"Error while getting the access token: {e}") from e
+
+
 class SourceBitbucketAnalytics(AbstractSource):
     @staticmethod
-    def _generate_repositories(config: Mapping[str, Any], authenticator: MultipleTokenAuthenticator) -> Tuple[List[str], List[str]]:
+    def _generate_repositories(config: Mapping[str, Any], authenticator: BitbucketAuthenticator) -> Tuple[List[str], List[str]]:
         """
         Parse repositories config line and produce two lists of repositories.
         Args:
@@ -80,7 +135,15 @@ class SourceBitbucketAnalytics(AbstractSource):
             creds = config.get("credentials")
             token = creds.get("access_token") or creds.get("personal_access_token")
         tokens = [t.strip() for t in token.split(TOKEN_SEPARATOR)]
-        return MultipleTokenAuthenticator(tokens=tokens, auth_method="Bearer")
+
+        client_id = config.get("client_id")
+        client_secret = config.get("client_secret")
+
+
+        # return Oauth2Authenticator(client_id=client_id, client_secret=client_secret)
+        # return MultipleTokenAuthenticator(tokens=tokens, auth_method="Bearer")
+        return BitbucketAuthenticator(client_id=client_id, client_secret=client_secret)
+
 
     @staticmethod
     def _get_branches_data(selected_branches: str, full_refresh_args: Dict[str, Any] = None) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
@@ -150,7 +213,7 @@ class SourceBitbucketAnalytics(AbstractSource):
         repository_args = {"authenticator": authenticator, "repositories": repositories}
         repository_args_with_start_date = {**repository_args, "start_date": config["start_date"]}
 
-        default_branches, branches_to_pull = self._get_branches_data(config.get("branch", ""), repository_args)
+        # default_branches, branches_to_pull = self._get_branches_data(config.get("branch", ""), repository_args)
         pull_requests_stream = PullRequests(**repository_args_with_start_date)
 
         return [

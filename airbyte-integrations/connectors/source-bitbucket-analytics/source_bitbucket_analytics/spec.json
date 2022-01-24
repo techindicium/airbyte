@@ -33,19 +33,26 @@
           },
           {
             "type": "object",
-            "title": "Authenticate with Personal Access Token",
-            "required": ["personal_access_token"],
+            "title": "Authenticate via Bitbucket (OAuth)",
+            "required": ["client_id", "client_secret"],
             "properties": {
               "option_title": {
                 "type": "string",
                 "title": "Credentials Title",
-                "description": "PAT Credentials",
-                "const": "PAT Credentials"
+                "description": "OAuth Credentials",
+                "const": "OAuth Credentials"
               },
-              "personal_access_token": {
+              "client_id": {
                 "type": "string",
-                "title": "Personal Access Tokens",
-                "description": "Log into Bitbucket and then generate a <a href=\"https://Bitbucket.com/settings/tokens\"> personal access token</a>. To load balance your API quota consumption across multiple API tokens, input multiple tokens separated with \",\"",
+                "title": "Client ID",
+                "description": "OAuth Client ID",
+                "airbyte_secret": true
+              }
+              ,
+              "client_secret": {
+                "type": "string",
+                "title": "Client Secret",
+                "description": "OAuth Client Secret",
                 "airbyte_secret": true
               }
             }
@@ -55,7 +62,7 @@
 
       "repository": {
         "type": "string",
-        "examples": ["techindicium/hu-airflow", "techindicium/*"],
+        "examples": ["indiciumtech/hu-airflow", "indiciumtech/*"],
         "title": "Bitbucket Repositories",
         "description": "Space-delimited list of Bitbucket repositories/organizations, e.g. `airbytehq/airbyte` for single repository and `airbytehq/*` for get all repositories from organization"
       },

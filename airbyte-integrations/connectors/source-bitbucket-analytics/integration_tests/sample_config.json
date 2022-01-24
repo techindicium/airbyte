@@ -1,5 +1,7 @@
 {
-  "access_token": "",
-  "repository": "indiciumtech/hu-airflow",
-  "start_date": "2021-06-29T03:46:25Z"
+  "access_token": "<your access token>",
+  "repository": "<your_repository>",
+  "start_date": "2021-06-29T03:46:25Z",
+  "client_id": "<user's_access_token>",
+  "client_secret":"<user's_access_token>"
 }

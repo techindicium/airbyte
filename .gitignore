@@ -15,6 +15,9 @@ data
 static_checker_reports/
 .vscode
 
+#credentials
+airbyte-integrations/connectors/source-bitbucket-analytics/config.json
+
 # Logs
 acceptance_tests_logs/
 

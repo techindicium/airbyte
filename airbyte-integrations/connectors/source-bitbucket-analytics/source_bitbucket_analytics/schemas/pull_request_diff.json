@@ -2,6 +2,9 @@
   "type": "object",
   "required": [],
   "properties": {
+    "repository": {
+      "type": ["string"]
+    },
     "diff": {
       "type": "string"
     }
