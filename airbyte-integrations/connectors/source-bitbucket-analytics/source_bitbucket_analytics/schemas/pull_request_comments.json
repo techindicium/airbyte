@@ -2,6 +2,9 @@
   "type": ["object", "null"],
   "required": [],
   "properties": {
+    "pull_request_id": {
+      "type": "string"
+    },
     "links": {
       "type": "object",
       "required": [],

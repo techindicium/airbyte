@@ -5,6 +5,9 @@
     "repository": {
       "type": ["string"]
     },
+    "pull_request_id": {
+      "type": "string"
+    },
     "diff": {
       "type": "string"
     }

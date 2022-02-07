@@ -43,15 +43,15 @@ class BitbucketStream(HttpStream, ABC):
             yield {"repository": repository}
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
-        try:
-            content = json.loads(response.content)
-        except ValueError as e:
-            content = {"value": response.text}
+        
+        content = json.loads(response.content)
 
         if "next" in content:
             next_link = content["next"]
             parsed_link = parse.urlparse(next_link)
             page = dict(parse.parse_qsl(parsed_link.query)).get("page")
+            if page == None:
+                return None
             return {"page": page}
 
     def should_retry(self, response: requests.Response) -> bool:
@@ -63,9 +63,9 @@ class BitbucketStream(HttpStream, ABC):
         )
 
     def backoff_time(self, response: requests.Response) -> Union[int, float]:
-        # This method is called if we run into the rate limit. Bitbucket limits requests to 5000 per hour and provides
+        # This method is called if we run into the rate limit. Bitbucket limits requests to 1000 per hour and provides
         # `X-RateLimit-Reset` header which contains time when this hour will be finished and limits will be reset so
-        # we again could have 5000 per another hour.
+        # we again could have 1000 per another hour.
 
         if response.status_code in [requests.codes.BAD_GATEWAY, requests.codes.SERVER_ERROR]:
             return None
@@ -346,10 +346,12 @@ class PullRequestSubstream(HttpSubStream, SemiIncrementalBitbucketStream, ABC):
         parent_state[PullRequests.first_read_override_key] = True
         parent_stream_slices = super().stream_slices(sync_mode=sync_mode, cursor_field=cursor_field, stream_state=parent_state)
         for parent_stream_slice in parent_stream_slices:
-            yield {
-                "pull_request_id": parent_stream_slice["parent"]["id"],
-                "repository": parent_stream_slice["parent"]["repository"],
-            }
+            if parent_stream_slice["parent"]["state"] != "DECLINED":
+                yield {
+                    "pull_request_id": parent_stream_slice["parent"]["id"],
+                    "repository": parent_stream_slice["parent"]["repository"],
+                    "pull_request_state": parent_stream_slice["parent"]["state"],
+                }
 
     def read_records(
         self,
@@ -372,7 +374,6 @@ class PullRequestSubstream(HttpSubStream, SemiIncrementalBitbucketStream, ABC):
 
         return record
 
-    
 
 # repositories > {workspace} > {repo_slug} > pullrequests > {pull_request_id} > diff
 class PullRequestDiff(PullRequestSubstream):
@@ -387,12 +388,36 @@ class PullRequestDiff(PullRequestSubstream):
     def path(
         self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
     ) -> str:
-        return f"repositories/{stream_slice['repository']}/pullrequests/{stream_slice['pull_request_id']}/diff"
+        return f"repositories/{stream_slice['repository']}/pullrequests/{stream_slice['pull_request_id']}/diffstat"
 
     def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        if stream_slice["pull_request_state"] != "DECLINED":
+            for record in response.json()["values"]:  # Bitbucket puts records in an array.
+                yield self.transform(record, repository=stream_slice["repository"], pull_request_id=stream_slice["pull_request_id"])
         # The endoint returns a string, so we need to parse it into a dict.
-        record = {"diff":response.text}
-        yield super().transform(record, repository=stream_slice["repository"], pull_request_id=stream_slice["pull_request_id"])
+
+    def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None) -> MutableMapping[str, Any]:
+        record = super().transform(record=record, repository=repository, pull_request_id=pull_request_id)
+        record = flatten_json(record)
+        return record
+
+def flatten_json(y):
+    out = {}
+
+    def flatten(x, name=''):
+        if type(x) is dict:
+            for a in x:
+                flatten(x[a], name + a + '_')
+        elif type(x) is list:
+            i = 0
+            for a in x:
+                flatten(a, name + str(i) + '_')
+                i += 1
+        else:
+            out[name[:-1]] = x
+
+    flatten(y)
+    return out
 
 # repositories > {workspace} > {repo_slug} > pullrequests > {pull_request_id} > Comments
 class PullRequestComments(PullRequestSubstream):
@@ -411,8 +436,13 @@ class PullRequestComments(PullRequestSubstream):
 
     def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
         for record in response.json()["values"]:  # GitHub puts records in an array.
-            yield super().transform(record=record, repository=stream_slice["repository"], \
+            yield self.transform(record=record, repository=stream_slice["repository"], \
                                     pull_request_id=stream_slice["pull_request_id"])
+
+    def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None) -> MutableMapping[str, Any]:
+        record = super().transform(record=record, repository=repository, pull_request_id=pull_request_id)
+        record = flatten_json(record)
+        return record
 
 
 # repositories > {workspace} > {repo_slug} > pullrequests > {pull_request_id} > Activities
@@ -436,7 +466,9 @@ class PullRequestActivity(PullRequestSubstream):
 
     def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None) -> MutableMapping[str, Any]:
         record = super().transform(record=record, repository=repository, pull_request_id=pull_request_id)
-        return {key: value for key, value in record.items() if key in self.record_keys}
+        record = {key: value for key, value in record.items() if key in self.record_keys}
+        record_flattened = flatten_json(record)
+        return record_flattened
 
 
 class RepositoryStats(BitbucketStream):
