@@ -13,7 +13,10 @@ from airbyte_cdk.models import SyncMode
 from airbyte_cdk.sources.streams.http import HttpStream, HttpSubStream
 from requests.exceptions import HTTPError
 import json
+from ratelimit import RateLimitException, limits, sleep_and_retry 
+from backoff import on_exception, expo
 
+ONE_HOUR = 3600
 
 class BitbucketStream(HttpStream, ABC):
     url_base = "https://api.bitbucket.org/2.0/"
@@ -57,75 +60,52 @@ class BitbucketStream(HttpStream, ABC):
     def should_retry(self, response: requests.Response) -> bool:
         # We don't call `super()` here because we have custom error handling and Bitbucket API sometimes returns strange
         # errors. So in `read_records()` we have custom error handling which don't require to call `super()` here.
-        return response.headers.get("X-RateLimit-Remaining") == "0" or response.status_code in (
+        should_retry = super().should_retry(response)
+        if should_retry == False:
+            pass
+        return response.status_code in (
             requests.codes.SERVER_ERROR,
-            requests.codes.BAD_GATEWAY,
+            requests.codes.BAD_GATEWAY, 429, 401, 403, 404, 500, 502, 503, 504
         )
 
     def backoff_time(self, response: requests.Response) -> Union[int, float]:
         # This method is called if we run into the rate limit. Bitbucket limits requests to 1000 per hour and provides
-        # `X-RateLimit-Reset` header which contains time when this hour will be finished and limits will be reset so
-        # we again could have 1000 per another hour.
-
-        if response.status_code in [requests.codes.BAD_GATEWAY, requests.codes.SERVER_ERROR]:
+        if response.status_code != 429:
             return None
+        return None  # This is a guarantee that no negative value will be returned.
 
-        reset_time = response.headers.get("X-RateLimit-Reset")
-        backoff_time = float(reset_time) - time.time() if reset_time else 60
+    def call_counter(func):
+        def helper(*args, **kwargs):
+            helper.calls += 1
+            if helper.calls == 990:
+                print("About to the exceed the 1000 requests limit per hour, sleeping for 61 seconds")
+                time.sleep(61)
+                helper.calls = 0
+            return func(*args, **kwargs)
+        helper.calls = 0
+        helper.__name__= func.__name__
+        return helper
 
-        return max(backoff_time, 60)  # This is a guarantee that no negative value will be returned.
-
-    ####################### NEEDS TO BE REFACTORED #######################
+    @call_counter
     def read_records(self, stream_slice: Mapping[str, any] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
         try:
+            self.logger.info(f"Reading records from Bitbucket {stream_slice.get('repository', {})}")
             yield from super().read_records(stream_slice=stream_slice, **kwargs)
         except HTTPError as e:
+            # This error occours due to a bug in the diffstats endpoint described in https://jira.atlassian.com/browse/BCLOUD-20247
+            if e.response.status_code == 555:
+                self.logger.error(f"The following error occurred: {e}. Make the commit for the pull request smaller or remove it.")
+                return {}
+            if e.response.status_code == 404:
+                self.logger.error(f"The following error occurred: {e}. Make the commit for the pull request smaller or remove it.")
+                return {}
+            if e.response.status_code == 401:
+                self.logger.error(f"The following error occurred: {e}. Make the commit for the pull request smaller or remove it.")
+                return {}
+
             error_msg = str(e)
-
-            # This whole try/except situation in `read_records()` isn't good but right now in `self._send_request()`
-            # function we have `response.raise_for_status()` so we don't have much choice on how to handle errors.
-            # Bocked on https://Bitbucket.com/airbytehq/airbyte/issues/3514.
-            if e.response.status_code == requests.codes.FORBIDDEN:
-                # When using the `check` method, we should raise an error if we do not have access to the repository.
-                if isinstance(self, Repositories):
-                    raise e
-                error_msg = (
-                    f"Syncing `{self.name}` stream isn't available for repository "
-                    f"`{stream_slice['repository']}` and your `access_token`, seems like you don't have permissions for "
-                    f"this stream."
-                )
-            elif e.response.status_code == requests.codes.NOT_FOUND and "/teams?" in error_msg:
-                # For private repositories `Teams` stream is not available and we get "404 Client Error: Not Found for
-                # url: https://api.Bitbucket.com/orgs/<org_name>/teams?per_page=100" error.
-                error_msg = f"Syncing `Team` stream isn't available for workspace `{stream_slice['workspace']}`."
-            elif e.response.status_code == requests.codes.NOT_FOUND and "/repos?" in error_msg:
-                # `Repositories` stream is not available for repositories not in an workspace.
-                # Handle "404 Client Error: Not Found for url: https://api.Bitbucket.com/orgs/<org_name>/repos?per_page=100" error.
-                error_msg = f"Syncing `Repositories` stream isn't available for workspace `{stream_slice['workspace']}`."
-            elif e.response.status_code == requests.codes.GONE and "/projects?" in error_msg:
-                # Some repos don't have projects enabled and we we get "410 Client Error: Gone for
-                # url: https://api.Bitbucket.com/repos/xyz/projects?per_page=100" error.
-                error_msg = f"Syncing `Projects` stream isn't available for repository `{stream_slice['repository']}`."
-            elif e.response.status_code == requests.codes.NOT_FOUND and "/orgs/" in error_msg:
-                # Some streams are not available for repositories owned by a user instead of an workspace.
-                # Handle "404 Client Error: Not Found" errors
-                if isinstance(self, Repositories):
-                    error_msg = f"Syncing `Repositories` stream isn't available for workspace `{stream_slice['workspace']}`."
-                elif isinstance(self, Workspaces):
-                    error_msg = f"Syncing `workspaces` stream isn't available for workspace `{stream_slice['workspace']}`."
-                else:
-                    self.logger.error(f"Undefined error while reading records: {error_msg}")
-                    raise e
-            elif e.response.status_code == requests.codes.CONFLICT:
-                error_msg = (
-                    f"Syncing `{self.name}` stream isn't available for repository "
-                    f"`{stream_slice['repository']}`, it seems like this repository is empty."
-                )
-            else:
-                self.logger.error(f"Undefined error while reading records: {error_msg}")
-                raise e
-
-            self.logger.warn(error_msg)
+            self.logger.error(f"Error Message: {error_msg}")
+            raise e
 
     def request_params(
         self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
@@ -163,7 +143,6 @@ class BitbucketStream(HttpStream, ABC):
             record["workspace"] = workspace
 
         return record
-
 
 class SemiIncrementalBitbucketStream(BitbucketStream):
     """
@@ -231,7 +210,6 @@ class SemiIncrementalBitbucketStream(BitbucketStream):
             elif self.is_sorted_descending and record.get(self.cursor_field) < start_point_map[stream_slice["repository"]]:
                 break
 
-
 class IncrementalBitbucketStream(SemiIncrementalBitbucketStream):
     def request_params(self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, Any] = None, **kwargs) -> MutableMapping[str, Any]:
         params = super().request_params(stream_state=stream_state, **kwargs)
@@ -271,7 +249,6 @@ class Workspaces(BitbucketStream):
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
         yield response.json()
 
-
 class Repositories(Workspaces):
     """
     API docs: https://docs.Bitbucket.com/en/rest/reference/repos#list-workspace-repositories
@@ -309,9 +286,8 @@ class PullRequests(SemiIncrementalBitbucketStream):
 
     def transform(self, record: MutableMapping[str, Any], repository: str = None, **kwargs) -> MutableMapping[str, Any]:
         record = super().transform(record=record, repository=repository, **kwargs)
-
-        record["repo_id"] = record.get("source").get("repository").get("uuid")
-
+        record["repo_id"] = record.get("source_repository_uuid")
+        
         return record
 
     def request_params(self, **kwargs) -> MutableMapping[str, Any]:
@@ -367,11 +343,9 @@ class PullRequestSubstream(HttpSubStream, SemiIncrementalBitbucketStream, ABC):
         yield from super(SemiIncrementalBitbucketStream, self).read_records(
             sync_mode=sync_mode, cursor_field=cursor_field, stream_slice=stream_slice, stream_state=stream_state
         )
-    
     def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None, **kwargs) -> MutableMapping[str, Any]:
         record = super().transform(record=record, repository=repository, **kwargs)
         record['pull_request_id'] = pull_request_id
-
         return record
 
 
@@ -390,6 +364,8 @@ class PullRequestDiff(PullRequestSubstream):
     ) -> str:
         return f"repositories/{stream_slice['repository']}/pullrequests/{stream_slice['pull_request_id']}/diffstat"
 
+    # For certain pull requests with too many commits, diffstat takes too long to return.
+
     def parse_response(self, response: requests.Response, stream_slice: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
         if stream_slice["pull_request_state"] != "DECLINED":
             for record in response.json()["values"]:  # Bitbucket puts records in an array.
@@ -398,26 +374,7 @@ class PullRequestDiff(PullRequestSubstream):
 
     def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None) -> MutableMapping[str, Any]:
         record = super().transform(record=record, repository=repository, pull_request_id=pull_request_id)
-        record = flatten_json(record)
         return record
-
-def flatten_json(y):
-    out = {}
-
-    def flatten(x, name=''):
-        if type(x) is dict:
-            for a in x:
-                flatten(x[a], name + a + '_')
-        elif type(x) is list:
-            i = 0
-            for a in x:
-                flatten(a, name + str(i) + '_')
-                i += 1
-        else:
-            out[name[:-1]] = x
-
-    flatten(y)
-    return out
 
 # repositories > {workspace} > {repo_slug} > pullrequests > {pull_request_id} > Comments
 class PullRequestComments(PullRequestSubstream):
@@ -441,9 +398,7 @@ class PullRequestComments(PullRequestSubstream):
 
     def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None) -> MutableMapping[str, Any]:
         record = super().transform(record=record, repository=repository, pull_request_id=pull_request_id)
-        record = flatten_json(record)
         return record
-
 
 # repositories > {workspace} > {repo_slug} > pullrequests > {pull_request_id} > Activities
 class PullRequestActivity(PullRequestSubstream):
@@ -465,11 +420,9 @@ class PullRequestActivity(PullRequestSubstream):
             yield self.transform(record=record, repository=stream_slice["repository"], pull_request_id=stream_slice["pull_request_id"])
 
     def transform(self, record: MutableMapping[str, Any], repository: str = None, pull_request_id: str = None) -> MutableMapping[str, Any]:
-        record = super().transform(record=record, repository=repository, pull_request_id=pull_request_id)
         record = {key: value for key, value in record.items() if key in self.record_keys}
-        record_flattened = flatten_json(record)
-        return record_flattened
-
+        record = super().transform(record=record, repository=repository, pull_request_id=pull_request_id)
+        return record
 
 class RepositoryStats(BitbucketStream):
     """

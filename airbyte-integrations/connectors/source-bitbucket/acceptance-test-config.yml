@@ -1,9 +1,9 @@
 # See [Source Acceptance Tests](https://docs.airbyte.io/connector-development/testing-connectors/source-acceptance-tests-reference)
 # for more information about how to configure these tests
-connector_image: airbyte/source-bitbucket-analytics:dev
+connector_image: airbyte/source-bitbucket:dev
 tests:
   spec:
-    - spec_path: "source_bitbucket_analytics/spec.json"
+    - spec_path: "source_bitbucket/spec.json"
   connection:
     - config_path: "secrets/config.json"
       status: "succeed"

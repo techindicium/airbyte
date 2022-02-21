@@ -4,17 +4,17 @@
 
 from unittest.mock import MagicMock
 
-from source_bitbucket_analytics.source import SourceBitbucketAnalytics
+from source_bitbucket.source import SourceBitbucket
 
 
 def test_check_connection(mocker):
-    source = SourceBitbucketAnalytics()
+    source = SourceBitbucket()
     logger_mock, config_mock = MagicMock(), MagicMock()
     assert source.check_connection(logger_mock, config_mock) == (True, None)
 
 
 def test_streams(mocker):
-    source = SourceBitbucketAnalytics()
+    source = SourceBitbucket()
     config_mock = MagicMock()
     streams = source.streams(config_mock)
     # TODO: replace this with your streams number

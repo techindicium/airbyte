@@ -9,13 +9,13 @@
     "properties": {
       "credentials": {
         "title": "Authentication Mechanism",
-        "description": "Choose how to authenticate to Bitbucket",
+        "description": "Refresh Token Authentication Bitbucket",
         "type": "object",
         "oneOf": [
           {
             "type": "object",
             "title": "Authenticate via Bitbucket (OAuth2)",
-            "required": [],
+            "required": ["refresh_token", "client_id", "client_secret"],
             "properties": {
               "option_title": {
                 "type": "string",

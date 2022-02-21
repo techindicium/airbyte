@@ -7,6 +7,7 @@ from setuptools import find_packages, setup
 
 MAIN_REQUIREMENTS = [
     "airbyte-cdk~=0.1",
+    "ratelimit",
 ]
 
 TEST_REQUIREMENTS = [
@@ -16,7 +17,7 @@ TEST_REQUIREMENTS = [
 ]
 
 setup(
-    name="source_bitbucket_analytics",
+    name="source_bitbucket",
     description="Source implementation for Bitbucket Analytics.",
     author="Airbyte",
     author_email="contact@airbyte.io",

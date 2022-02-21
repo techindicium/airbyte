@@ -26,7 +26,7 @@ TOKEN_SEPARATOR = ","
 # specified by using asteriks i.e. "airbytehq/*"
 workspace_PATTERN = re.compile("^.*/\\*$")
 
-class SourceBitbucketAnalytics(AbstractSource):
+class SourceBitbucket(AbstractSource):
     @staticmethod
     def _generate_repositories(config: Mapping[str, Any], authenticator: Oauth2Authenticator) -> Tuple[List[str], List[str]]:
         """
@@ -58,10 +58,16 @@ class SourceBitbucketAnalytics(AbstractSource):
 
     @staticmethod
     def _get_authenticator(config: Dict[str, Any]):
-
-        client_id = config.get("client_id")
-        client_secret = config.get("client_secret")
-        refresh_token = config.get("refresh_token")
+        
+        creds = config.get("credentials")
+        if creds != None:
+            client_id = creds.get("client_id")
+            client_secret = creds.get("client_secret")
+            refresh_token = creds.get("refresh_token")
+        else:
+            client_id = config.get("client_id")
+            client_secret = config.get("client_secret")
+            refresh_token = config.get("refresh_token")
 
         return Oauth2Authenticator(token_refresh_endpoint="https://bitbucket.org/site/oauth2/access_token", client_id=client_id, client_secret=client_secret, refresh_token=refresh_token)
 
